@@ -1,7 +1,12 @@
 package com.android.ncpow.copiamapapplication;
 
-import android.support.v4.app.FragmentActivity;
+import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -10,9 +15,28 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Scanner;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    public String LOG_TAG = MapsActivity.class.getSimpleName();
+
+    Context context;
+
+    String FILENAME = "coordinates.json";
+
+    File file = new File(Environment.getDataDirectory(), FILENAME);
+
+
     private GoogleMap mMap;
+
+    public MapsActivity() throws FileNotFoundException {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +46,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        String test = loadCoordinates();
+
+        Log.e(LOG_TAG, test);
+
     }
 
 
@@ -37,10 +66,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        final Double sum = 0.1;
+        final Double[] testCoordinates = new Double[2];
+        testCoordinates[0] = 36.3343947;
+        testCoordinates[1] = -121.0870109;
+        for ( int i = 0; i < 1; i++ ) {
+            final LatLng latLng = new LatLng(testCoordinates[i], testCoordinates[i+1]);
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+            final int finalI = i;
+            boolean b = new Handler().postDelayed(
+
+                    new Runnable() {
+                        public void run() {
+                            mMap.addMarker(new MarkerOptions().position(latLng).title("test"));
+                            Log.i(LOG_TAG, "This'll run 5000 milliseconds later");
+                        }
+                    },
+                    5000);
+
+        }
+
+
+        LatLng start = new LatLng(37.3343947,-122.0464412 );
+        //LatLng end = new LatLng(37.33947623,-122.0870109 );
+        mMap.addMarker(new MarkerOptions().position(start).title("Copia start position"));
+       // mMap.addMarker(new MarkerOptions().position(end).title("Copia end position"));
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(start));
+    }
+
+
+    public String loadCoordinates() {
+
+        Resources res = getResources();
+
+        InputStream stream = res.openRawResource(R.raw.coordinates);
+
+        Scanner in = new Scanner(stream);
+
+        in.useLocale(Locale.US);
+
+        StringBuilder builder = new StringBuilder();
+        ArrayList list = new ArrayList();
+
+        while( in.hasNext()) {
+            builder.append(in.nextLine());
+        }
+
+        return builder.toString();
     }
 }
