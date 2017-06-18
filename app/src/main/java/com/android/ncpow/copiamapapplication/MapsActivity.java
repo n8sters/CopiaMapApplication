@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -19,8 +18,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -47,9 +49,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        String test = loadCoordinates();
-
-        Log.e(LOG_TAG, test);
 
     }
 
@@ -66,23 +65,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        final Double sum = 0.1;
-        final Double[] testCoordinates = new Double[2];
-        testCoordinates[0] = 36.3343947;
-        testCoordinates[1] = -121.0870109;
-        for ( int i = 0; i < 1; i++ ) {
-            final LatLng latLng = new LatLng(testCoordinates[i], testCoordinates[i+1]);
+        String test = loadCoordinates();
+        final List<Double> testCoordinatesA = getLatCoordinates(test);
+        final List<Double> testCoordinatesB = getLongCoordinates(test);
 
-            final int finalI = i;
-            boolean b = new Handler().postDelayed(
+        Handler handler = new Handler();
+        for ( int i = 0; i < testCoordinatesA.size(); i++ ) {
+            final int x = i;
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    final LatLng latLng = new LatLng(testCoordinatesA.get(x), testCoordinatesB.get(x));
 
-                    new Runnable() {
-                        public void run() {
-                            mMap.addMarker(new MarkerOptions().position(latLng).title("test"));
-                            Log.i(LOG_TAG, "This'll run 5000 milliseconds later");
-                        }
-                    },
-                    5000);
+                }
+            }, 500);
+            final LatLng latLng = new LatLng(testCoordinatesA.get(i), testCoordinatesB.get(i));
+
+
 
         }
 
@@ -114,5 +113,98 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         return builder.toString();
+    }
+
+    public void convertJSONStringtoDoubleArray(String coordinates) {
+        // start here!
+        Pattern p = Pattern.compile("\\d{2,3}.\\d*");
+
+        Matcher m = p.matcher(coordinates);
+        List<String> coord = new ArrayList<>();
+
+        while (m.find()) {
+            //System.out.println("Found a " + m.group());
+            coord.add(m.group());
+        }
+
+        // currently getting values!
+        // but....
+        // it's stripping the "-" sign off the 122's
+        // so I'm checking if the Double value of the String
+        // > 100 then m
+        // multiply it by -1.
+
+        List<Double> arrA = new ArrayList<>();
+        List<Double> arrB = new ArrayList<>();
+
+        //System.out.println("Coord size " + coord.size());
+
+        for ( int i = 0; i < coord.size(); i++ ) {
+            if ( i % 2 == 0) {
+                arrA.add(Double.parseDouble(coord.get(i)));
+            } else {
+                arrB.add(Double.parseDouble(coord.get(i)) * -1);
+            }
+        }
+
+        //System.out.println("Array A: " + arrA.size());
+        //System.out.println("Array B: " + arrB.size());
+
+        for ( int i = 0; i <arrA.size(); i++ ) {
+            System.out.println("Arr A value: " + arrA.get(i));
+            System.out.println("Arr B value: " + arrB.get(i));
+        }
+
+        // ok!
+    }
+
+    // gets the latitude from the JSON string
+    public List<Double> getLatCoordinates(String coordinates ) {
+
+        // start here!
+        Pattern p = Pattern.compile("\\d{2,3}.\\d*");
+
+        Matcher m = p.matcher(coordinates);
+        List<String> coord = new ArrayList<>();
+
+        while (m.find()) {
+            coord.add(m.group());
+        }
+
+        List<Double> latArr = new ArrayList<>();
+
+        // another option
+        for ( int i = 0; i < coord.size(); i++ ) {
+            if ( Double.parseDouble(coord.get(i)) < 100 ) {
+                latArr.add(Double.parseDouble(coord.get(i)));
+            }
+        }
+
+        return latArr;
+    }
+
+    // gets the longitude from a JSON string
+    public List<Double> getLongCoordinates(String coordinates ) {
+
+        // start here!
+        Pattern p = Pattern.compile("\\d{2,3}.\\d*");
+
+        Matcher m = p.matcher(coordinates);
+        List<String> coord = new ArrayList<>();
+
+        while (m.find()) {
+            coord.add(m.group());
+        }
+
+        List<Double> longArr = new ArrayList<>();
+
+        // another option
+        for ( int i = 0; i < coord.size(); i++ ) {
+            if ( Double.parseDouble(coord.get(i)) > 100 ) {
+                longArr.add(Double.parseDouble(coord.get(i)) * -1);
+            }
+        }
+
+        return longArr;
     }
 }
