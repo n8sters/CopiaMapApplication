@@ -3,6 +3,7 @@ package com.android.ncpow.copiamapapplication;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -76,31 +77,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final List<Double> testCoordinatesB = getLongCoordinates(test);
 
 
-        // FINALLY WORKINGGGGGGGGGGG YUSSSSSS THANK GODDDD
         Handler handler1 = new Handler();
         final LatLng latLng = new LatLng(37.3343947, -122.0464412);
+        Drawable circleDrawable = getResources().getDrawable(R.drawable.circle_shape);
+        BitmapDescriptor markerIcon = getMarkerIconFromDrawable(circleDrawable);
+        final MarkerOptions marker = new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(String.valueOf(R.mipmap.current_location), 150, 150)));
+        final Marker m = mMap.addMarker(marker);
+
         for ( int i = 0; i < testCoordinatesA.size(); i++ ) {
             final int finalI = i;
             handler1.postDelayed(new Runnable() {
 
                 @Override
                 public void run() {
-                    Drawable circleDrawable = getResources().getDrawable(R.drawable.circle_shape);
-                    BitmapDescriptor markerIcon = getMarkerIconFromDrawable(circleDrawable);
-                    MarkerOptions marker = new MarkerOptions().position(latLng).icon(markerIcon);
-                    Marker m = mMap.addMarker(marker);
                     m.setPosition(new LatLng(testCoordinatesA.get(finalI), testCoordinatesB.get(finalI)));
                 }
 
-
             }, 500 * i);
-
         }
 
         goToLocationZoom(37.3343947,-122.0464412, 15);
 
         LatLng start = new LatLng(37.3343947,-122.0464412 );
         mMap.moveCamera(CameraUpdateFactory.newLatLng(start));
+    }
+
+    public Bitmap resizeMapIcons(String iconName, int width, int height) {
+        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(iconName, "drawable", getPackageName()));
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
+        return resizedBitmap;
     }
 
     private void goToLocationZoom(double lat, double lng, float zoom ) {
