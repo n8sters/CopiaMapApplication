@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,7 +51,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
     }
 
 
@@ -62,6 +63,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+
+    // maybe declare varuable syncrtonized or volitile
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -69,29 +73,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final List<Double> testCoordinatesA = getLatCoordinates(test);
         final List<Double> testCoordinatesB = getLongCoordinates(test);
 
-        Handler handler = new Handler();
+        final Handler handler = new Handler();
+
+
+        final Stack<Double> latStack = new Stack<>();
+        final Stack<Double> lngStack = new Stack<>();
+        for ( int i = 0; i < testCoordinatesA.size(); i++ ) {
+            latStack.push(testCoordinatesA.get(i));
+            lngStack.push(testCoordinatesB.get(i));
+        }
+        // points still not loading one at a time with a 0.5 sec delay! :(
         for ( int i = 0; i < testCoordinatesA.size(); i++ ) {
             final int x = i;
-            handler.postDelayed(new Runnable() {
+            final Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    final LatLng latLng = new LatLng(testCoordinatesA.get(x), testCoordinatesB.get(x));
-
+                    handler.postDelayed(this, 500);
+                    final LatLng latLng = new LatLng(testCoordinatesA.get(x),testCoordinatesB.get(x));
+                    mMap.addMarker(new MarkerOptions().position(latLng).title(Integer.toString(x)));
                 }
-            }, 500);
-            final LatLng latLng = new LatLng(testCoordinatesA.get(i), testCoordinatesB.get(i));
+            };
 
-
-
+            handler.postDelayed(runnable, 3000);
         }
-
+        goToLocationZoom(37.3343947,-122.0464412, 15);
 
         LatLng start = new LatLng(37.3343947,-122.0464412 );
         //LatLng end = new LatLng(37.33947623,-122.0870109 );
         mMap.addMarker(new MarkerOptions().position(start).title("Copia start position"));
        // mMap.addMarker(new MarkerOptions().position(end).title("Copia end position"));
-
         mMap.moveCamera(CameraUpdateFactory.newLatLng(start));
+    }
+
+    private void goToLocationZoom(double lat, double lng, float zoom ) {
+        LatLng latLng = new LatLng(lat, lng);
+        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
+        mMap.moveCamera(update);
     }
 
 
