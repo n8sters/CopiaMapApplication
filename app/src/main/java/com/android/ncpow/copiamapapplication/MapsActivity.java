@@ -2,6 +2,9 @@ package com.android.ncpow.copiamapapplication;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -13,6 +16,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -95,8 +100,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 @Override
                 public void run() {
                     Log.i(LOG_TAG, "test");
+                    Drawable circleDrawable = getResources().getDrawable(R.drawable.circle_shape);
+                    BitmapDescriptor markerIcon = getMarkerIconFromDrawable(circleDrawable);
+
                     final LatLng latLng = new LatLng(testCoordinatesA.get(finalI), testCoordinatesB.get(finalI));
-                    mMap.addMarker(new MarkerOptions().position(latLng).title(Integer.toString(x)));
+                    MarkerOptions marker = new MarkerOptions().position(latLng).title(Integer.toString(x)).icon(markerIcon);
+                    mMap.addMarker(marker);
                     // mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 }
             }, 500 * i);
@@ -115,6 +124,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng latLng = new LatLng(lat, lng);
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
         mMap.moveCamera(update);
+    }
+
+    private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
+        Canvas canvas = new Canvas();
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
 
