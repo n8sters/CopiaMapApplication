@@ -3,4 +3,5 @@
     <string name="title_activity_maps">Map</string>
     <string name="map_screen_label">Navigation Screen</string>
     <string name="start_navigation_label">Start Navigation</string>
+    <string name="toast_message">This could start a new navigation or something similar. I just put this here as an example. </string>
 </resources>
