@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -25,6 +26,8 @@ import java.util.Scanner;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static android.R.attr.x;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -82,25 +85,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             latStack.push(testCoordinatesA.get(i));
             lngStack.push(testCoordinatesB.get(i));
         }
-        // points still not loading one at a time with a 0.5 sec delay! :(
+
+        // FINALLY WORKINGGGGGGGGGGG YUSSSSSS THANK GODDDD
+        Handler handler1 = new Handler();
         for ( int i = 0; i < testCoordinatesA.size(); i++ ) {
-            final int x = i;
-            final Runnable runnable = new Runnable() {
+            final int finalI = i;
+            handler1.postDelayed(new Runnable() {
+
                 @Override
                 public void run() {
-                    handler.postDelayed(this, 500);
-                    final LatLng latLng = new LatLng(testCoordinatesA.get(x),testCoordinatesB.get(x));
+                    Log.i(LOG_TAG, "test");
+                    final LatLng latLng = new LatLng(testCoordinatesA.get(finalI), testCoordinatesB.get(finalI));
                     mMap.addMarker(new MarkerOptions().position(latLng).title(Integer.toString(x)));
+                    // mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 }
-            };
-
-            handler.postDelayed(runnable, 3000);
+            }, 500 * i);
         }
+
         goToLocationZoom(37.3343947,-122.0464412, 15);
 
         LatLng start = new LatLng(37.3343947,-122.0464412 );
         //LatLng end = new LatLng(37.33947623,-122.0870109 );
-        mMap.addMarker(new MarkerOptions().position(start).title("Copia start position"));
+        //mMap.addMarker(new MarkerOptions().position(start).title("Copia start position"));
        // mMap.addMarker(new MarkerOptions().position(end).title("Copia end position"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(start));
     }
