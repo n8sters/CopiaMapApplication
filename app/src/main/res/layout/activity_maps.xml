@@ -17,7 +17,7 @@
         android:text="@string/map_screen_label"
         android:textColor="@color/white"
         android:textSize="24sp"
-        android:paddingTop="10dp"
+        android:paddingTop="8dp"
         android:textStyle="bold"
         android:background="@color/colorPrimary" />
 
