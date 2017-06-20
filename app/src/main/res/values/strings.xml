@@ -4,4 +4,5 @@
     <string name="map_screen_label">Navigation Screen</string>
     <string name="start_navigation_label">Start Navigation</string>
     <string name="toast_message">This could start a new navigation or something similar. I just put this here as an example. </string>
+    <string name="marker_title">\"Copia Food Hero #1\"</string>
 </resources>

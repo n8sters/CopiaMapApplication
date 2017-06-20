@@ -102,7 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         BitmapDescriptor markerIcon = getMarkerIconFromDrawable(circleDrawable);*/
 
         // sets up marker
-        final MarkerOptions marker = new MarkerOptions().position(latLng)
+        final MarkerOptions marker = new MarkerOptions().position(latLng).title("Copia Food Hero #1")
                 .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(String.valueOf(R.mipmap.current_location)
                 )));
 
